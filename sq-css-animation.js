@@ -103,7 +103,7 @@
             //return string style value 
             this.cssValue = function(property)
             {
-                return window.getComputedStyle(this, null).getPropertyValue(property)//window.getComputedStyle(this, null).getPropertyCSSValue(property).cssText
+                return window.getComputedStyle(this, null).getPropertyValue(property);
             };
             
             
@@ -144,47 +144,56 @@
                this.style.transform = "translate("+x+"px, "+y+"px) rotate("+rotate+"deg) scale("+scale+")";
             }
             
-            this.animation = function(obj, onComplete){
+            this.animation = function(obj, events){
                 
+                if(!('delay' in obj)) obj.delay = 0;
                 if(obj === undefined) return 'empty ';
                 if(!('time' in obj)) obj.time = 1;
                 if(!('ease' in obj)) obj.ease = 'linear';
                 
-                this.style.setProperty('-webkit-transition', obj.time+'s '+obj.ease);
-                this.style.setProperty('-moz-transition', obj.time+'s '+obj.ease);
-                this.style.setProperty('-ms-transition', obj.time+'s '+obj.ease);
-                this.style.setProperty('-o-transition', obj.time+'s '+obj.ease);
-                this.style.setProperty('transition', obj.time+'s '+obj.ease);
+                console.log('events',events)
                 
-                
-                if('opacity' in obj){
-                    this.style.setProperty("opacity", obj.opacity);
-                }
-                if('color' in obj){
-                    this.style.setProperty("color", obj.color);
-                }
-                if('backgroundColor' in obj){
-                    this.style.setProperty("background-color", obj.backgroundColor);
-                }
-                
-                
-                if('x' in obj && 'y' in obj)
-                {
-                    if('scale' in obj) this.transform( obj.x, obj.y, 0, obj.scale);
-                    else this.transform( obj.x, obj.y);
-                }
-                else if('y' in obj) this.transform(this.getTransform().x, obj.y);
-                else if('x' in obj) this.transform( obj.x, this.getTransform().y);
-                else if('scale' in obj) this.transform(this.getTransform().x, this.getTransform().y, 0, obj.scale);
-                
-                if(onComplete){
-                    setTimeout(function() {
-                        onComplete();
-                    }.bind(this), obj.time * 1000);
-                }
-            }
-             
-            
+                setTimeout(function(){
+                    this.style.setProperty('-webkit-transition', obj.time+'s '+obj.ease);
+                    this.style.setProperty('-moz-transition', obj.time+'s '+obj.ease);
+                    this.style.setProperty('-ms-transition', obj.time+'s '+obj.ease);
+                    this.style.setProperty('-o-transition', obj.time+'s '+obj.ease);
+                    this.style.setProperty('transition', obj.time+'s '+obj.ease);
+
+                    if('opacity' in obj){
+                        this.style.setProperty("opacity", obj.opacity);
+                    }
+                    if('color' in obj){
+                        this.style.setProperty("color", obj.color);
+                    }
+                    if('backgroundColor' in obj){
+                        this.style.setProperty("background-color", obj.backgroundColor);
+                    }
+
+                    if('x' in obj && 'y' in obj)
+                    {
+                        if('scale' in obj) this.transform( obj.x, obj.y, 0, obj.scale);
+                        else this.transform( obj.x, obj.y);
+                    }
+                    else if('y' in obj) this.transform(this.getTransform().x, obj.y);
+                    else if('x' in obj) this.transform( obj.x, this.getTransform().y);
+                    else if('scale' in obj) this.transform(this.getTransform().x, this.getTransform().y, 0, obj.scale);
+                   
+                    
+                    if(events){
+                        if('init' in events){
+                            events.init()
+                        }
+
+                        if('complete' in events){
+                            setTimeout(function() {
+                                events.complete();
+                            }.bind(this), obj.time * 1000);
+                        }  
+                    }
+                        
+                }.bind(this), obj.delay * 1000);
+            }            
         }
     };
  
