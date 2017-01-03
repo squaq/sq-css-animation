@@ -114,10 +114,24 @@
                  this.cssValue("-o-transform") ||
                  this.cssValue("transform") ||
                  "fail...";
+//                console.log('tr after', tr)
                 var matrix = tr.replace(/[^0-9\-.,]/g, '').split(',');
                 var x = matrix[12] || matrix[4];//translate x
                 var y = matrix[13] || matrix[5];
-                return {'x':x, 'y':y};
+//                console.log('tr before', tr)
+                
+                var scale = {'x': 1, 'y': 1};
+                if( tr ) {
+                    tr = tr.replace('matrix(', '').replace(')', '').split(', ');
+//                    console.log('tr before before', tr)
+                    scale.x = parseFloat(tr[0]);
+                    scale.y = parseFloat(tr[3]);
+                }
+//                return scale;
+                
+                
+                
+                return {'x':x, 'y':y, 'scaleX':scale.x, 'scaleY':scale.y};
             }
             
             //return div width
@@ -129,19 +143,47 @@
             //return div margin-right
             this.right = function(){return parseInt(this.cssValue('margin-right'));}
              
+            
             //set div transformations with cross-browser
             //@params x, y, rotate = 0, scale = 1
-            this.transform = function(x, y, rotate, scale)
-            {
-                if(x === undefined) {x = 0;console.log("foi Y")}
-                if(y === undefined) {y = 0; console.log("foi Y")}
+            this.transform = function(obj){
+//                console.log('my obj', obj)
+                var  trans = '';
+                    
+                if('x' in obj && 'y' in obj){
+                    trans = "translate("+obj.x+"px, "+obj.y+"px)";
+                } else if('x' in obj){ 
+                    trans = "translate("+obj.x+"px, "+this.getTransform().y+"px)";
+                }else if('y' in obj){
+                   trans =  "translate("+this.getTransform().x+"px, "+obj.y+"px)";
+                }
                 
-               if(!rotate) rotate = 0; if(!scale) scale = 1;
-               this.style.webkitTransform = "translate("+x+"px, "+y+"px) rotate("+rotate+"deg) scale("+scale+")";
-               this.style.MozTransform = "translate("+x+"px, "+y+"px) rotate("+rotate+"deg) scale("+scale+")";
-               this.style.msTransform = "translate("+x+"px, "+y+"px) rotate("+rotate+"deg) scale("+scale+")";
-               this.style.OTransform = "translate("+x+"px, "+y+"px) rotate("+rotate+"deg) scale("+scale+")";
-               this.style.transform = "translate("+x+"px, "+y+"px) rotate("+rotate+"deg) scale("+scale+")";
+                
+                if('rotate' in obj){ trans+= " rotate("+obj.rotate+"deg)"}
+                if('scale' in obj){ trans+= " scale("+obj.scale+")"}
+                
+                
+                delete obj['x'];
+                delete obj['y'];
+                delete obj['rotate'];
+                delete obj['scale'];
+                
+                if(trans.length > 0){
+                    this.style.webkitTransform = trans;
+                    this.style.MozTransform = trans;
+                    this.style.msTransform = trans;
+                    this.style.OTransform = trans;
+                    this.style.transform = trans;
+                }
+            }
+            
+            this.css = function(obj){
+                if(obj){
+                    this.transform(obj);
+                    for(var o in obj) {
+                        this.style.setProperty(o, obj[o])
+                    }    
+                }
             }
             
             this.animation = function(obj, events){
@@ -151,47 +193,30 @@
                 if(!('time' in obj)) obj.time = 1;
                 if(!('ease' in obj)) obj.ease = 'linear';
                 
-                console.log('events',events)
-                
                 setTimeout(function(){
                     this.style.setProperty('-webkit-transition', obj.time+'s '+obj.ease);
                     this.style.setProperty('-moz-transition', obj.time+'s '+obj.ease);
                     this.style.setProperty('-ms-transition', obj.time+'s '+obj.ease);
                     this.style.setProperty('-o-transition', obj.time+'s '+obj.ease);
                     this.style.setProperty('transition', obj.time+'s '+obj.ease);
-
-                    if('opacity' in obj){
-                        this.style.setProperty("opacity", obj.opacity);
-                    }
-                    if('color' in obj){
-                        this.style.setProperty("color", obj.color);
-                    }
-                    if('backgroundColor' in obj){
-                        this.style.setProperty("background-color", obj.backgroundColor);
-                    }
-
-                    if('x' in obj && 'y' in obj)
-                    {
-                        if('scale' in obj) this.transform( obj.x, obj.y, 0, obj.scale);
-                        else this.transform( obj.x, obj.y);
-                    }
-                    else if('y' in obj) this.transform(this.getTransform().x, obj.y);
-                    else if('x' in obj) this.transform( obj.x, this.getTransform().y);
-                    else if('scale' in obj) this.transform(this.getTransform().x, this.getTransform().y, 0, obj.scale);
-                   
+                    
+                    this.css(obj);
                     
                     if(events){
                         if('init' in events){
                             events.init()
                         }
-
-                        if('complete' in events){
-                            setTimeout(function() {
-                                events.complete();
-                            }.bind(this), obj.time * 1000);
-                        }  
                     }
+                    
+                    setTimeout(function() {
+                        if(events && 'complete' in events) events.complete();
+                        this.style.removeProperty('-webkit-transition', obj.time+'s '+obj.ease);
+                        this.style.removeProperty('-moz-transition', obj.time+'s '+obj.ease);
+                        this.style.removeProperty('-ms-transition', obj.time+'s '+obj.ease);
+                        this.style.removeProperty('-o-transition', obj.time+'s '+obj.ease);
+                        this.style.removeProperty('transition', obj.time+'s '+obj.ease);
                         
+                    }.bind(this), obj.time * 1000);
                 }.bind(this), obj.delay * 1000);
             }            
         }

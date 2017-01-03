@@ -1,0 +1,36 @@
+{
+  "name": "sq-css-animation",
+  "version": "1.0.0",
+  "description": "Animation and js selector lib to help in ad banners",
+  "main": "sq-css-animation.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/squaq/sq-css-animation.git"
+  },
+  "keywords": [
+    "squaq",
+    "css",
+    "animation",
+    "js",
+    "sq",
+    "sqanimation",
+    "squaqanimation",
+    "sq-css-animation"
+  ],
+  "author": "Squaq",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/squaq/sq-css-animation/issues"
+  },
+  "homepage": "https://github.com/squaq/sq-css-animation#readme",
+  "devDependencies": {
+    "grunt-contrib-uglify": "^2.0.0",
+    "gulp-uglify": "^2.0.0"
+  }
+}
